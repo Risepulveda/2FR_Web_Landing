@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2FR - Análisis Predictivo y Prescriptivo | IA & Optimización</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            color: #1a1f2e;
+            line-height: 1.6;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(250, 250, 250, 0.95));
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1003;
+            background: rgba(248, 250, 251, 0.92);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 102, 204, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #000000;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1a1f2e;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #0066cc;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #0066cc, #00ccff);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .lang-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .lang-link {
+            cursor: pointer;
+            color: #0a1428;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 500;
+        }
+
+        .lang-link:hover {
+            color: #0066cc;
+        }
+
+        .lang-link.active {
+            color: #0066cc;
+            font-weight: 700;
+            cursor: default;
+        }
+
+        .lang-divider {
+            color: #ccc;
+        }
+
+       .nav-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            z-index: 1004;
+        }
+
+        .nav-toggle span {
+            display: block;
+            width: 24px;
+            height: 2px;
+            background: #0a1428;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .nav-toggle.open span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .nav-toggle.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .nav-toggle.open span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        @media (max-width: 900px) {
+            .nav-toggle {
+                display: flex;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                max-width: 320px;
+                height: 100vh;
+                background: #ffffff;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+                padding: 6rem 2rem 2rem;
+                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+                transition: right 0.3s ease;
+                font-size: 1rem;
+            }
+
+            .nav-links.open {
+                right: 0;
+            }
+        }
+
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 60px;
+            margin-bottom: 5rem;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.30);
+            border-radius: 12px;
+            background: #f5f5f5;
+            margin-left: 2rem;
+            margin-right: 2rem;
+            max-width: calc(100% - 4rem);
+            margin: 60px auto 5rem auto;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            max-width: 900px;
+            padding: 2rem;
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: #0a1428;
+            line-height: 1.2;
+        }
+
+        .quote {
+            font-weight: 400;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.9rem 2.2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0066cc, #0099ff);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 102, 204, 0.25);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #0066cc;
+            border: 2px solid #0066cc;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 102, 204, 0.08);
+            transform: translateY(-2px);
+        }
+
+        section {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 4rem auto;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.30);
+            border-radius: 12px;
+        }
+
+        section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f5f5f5;
+            z-index: -1;
+            border-radius: 12px;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: #0a1428;
+        }
+
+        .section-subtitle {
+            font-size: 1.05rem;
+            color: #2c3e50;
+            margin-bottom: 3rem;
+            max-width: 700px;
+        }
+
+        .capacidades-intro {
+            color: #34495e;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .capacidades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .capacidad-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(240, 248, 255, 0.6));
+            border: 1px solid rgba(0, 102, 204, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .capacidad-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0066cc, #00ccff);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .capacidad-card:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(230, 245, 255, 0.8));
+            border-color: rgba(0, 102, 204, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 102, 204, 0.1);
+        }
+
+        .capacidad-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .capacidad-number {
+            color: #0066cc;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .capacidad-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .capacidad-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: #0a1428;
+        }
+
+        .capacidad-desc {
+            color: #34495e;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Servicios Section */
+        .servicios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .servicio-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(245, 250, 255, 0.7));
+            border: 1px solid rgba(0, 102, 204, 0.15);
+            border-radius: 12px;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .servicio-card:hover {
+            border-color: rgba(0, 102, 204, 0.4);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 250, 255, 0.9));
+            box-shadow: 0 20px 40px rgba(0, 102, 204, 0.12);
+            transform: translateY(-6px);
+        }
+
+        .servicio-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0a1428;
+        }
+
+        .servicio-desc {
+            color: #34495e;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .servicio-badge {
+            display: inline-block;
+            background: rgba(0, 102, 204, 0.12);
+            color: #0066cc;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .quienes-somos-intro {
+            color: #2c3e50;
+            margin-bottom: 3rem;
+            font-size: 1rem;
+            max-width: 800px;
+            line-height: 1.8;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .team-member {
+            text-align: center;
+        }
+
+        .member-avatar {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 1.5rem;
+            border-radius: 12px;
+            display: block;
+            object-fit: cover;
+        }
+
+        .member-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #0a1428;
+        }
+
+        .member-title {
+            color: #0066cc;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .member-bio {
+            color: #34495e;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .linkedin-badge {
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .linkedin-badge a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .linkedin-badge a:hover {
+            color: #00ccff;
+        }
+
+        #contacto {
+            text-align: center;
+        }
+
+        .contacto-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .contacto-intro {
+            color: #2c3e50;
+            margin-bottom: 2.5rem;
+            font-size: 1.05rem;
+        }
+
+        .contacto-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .contact-icon {
+            color: #0066cc;
+            font-size: 1.3rem;
+        }
+
+        .contact-link {
+            color: #1a1f2e;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .contact-link:hover {
+            color: #0066cc;
+        }
+
+        footer {
+            background: rgba(255, 255, 255, 0.5);
+            border-top: 1px solid rgba(0, 102, 204, 0.1);
+            padding: 2rem;
+            text-align: center;
+            color: #5d6d7b;
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .hero {
+                margin-bottom: 3rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            section {
+                padding: 4rem 1.5rem;
+                margin: 3rem auto;
+            }
+
+            .team-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .capacidades-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .servicio-card {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <img src="logo.png" alt="2FR Logo" style="width: 50px; height: auto; margin-right: 12px; display: block;">
+                <span>2FR</span>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#motor">Motor Analítico</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#metodologia">Nuestro Enfoque</a></li>
+                <li><a href="#quienes-somos">Quiénes Somos</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+                <li>
+                    <div class="lang-selector">
+                        <span class="lang-link active">ES</span>
+                        <span class="lang-divider">|</span>
+                        <a href="en.html" class="lang-link">EN</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <script>
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle.addEventListener('click', () => {
+            const isOpen = navLinks.classList.toggle('open');
+            navToggle.classList.toggle('open', isOpen);
+            navToggle.setAttribute('aria-expanded', isOpen);
+        });
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('open');
+                navToggle.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', false);
+            });
+        });
+    </script>
+
+    <section class="hero" id="inicio">
+        <canvas id="meshCanvas"></canvas>
+        <div class="hero-content">
+            <h1><span class="quote">"</span>Simplificando la complejidad<span class="quote">"</span></h1>
+            <p><strong>Inteligencia Artificial</strong> y <strong>Analítica Avanzada</strong><br>para análisis predictivo y prescriptivo que transforman datos en decisiones automatizadas, optimizando operaciones y resultados del negocio.</p>
+            <p style="font-size: 0.95rem; color: #2c3e50;">Diseñamos, desarrollamos e implementamos — desde el diagnóstico hasta la solución en producción.</p>
+        </div>
+    </section>
+
+    <section id="motor">
+        <h2 class="section-title">El Motor Analítico Detrás de Cada Solución</h2>
+        <p class="section-subtitle">Detrás de cada solución que entregamos existe una sólida base científica. Cinco capacidades matemáticas que se combinan para resolver los problemas más complejos de cada industria — y que en su forma más avanzada, operan de forma completamente autónoma.</p>
+
+        <div class="capacidades-intro">Nuestras Capacidades Fundamentales</div>
+        <div class="capacidades-grid">
+            <div class="capacidad-card">
+                <div class="capacidad-number">01</div>
+                <div class="capacidad-title">Modelación matemática avanzada</div>
+                <div class="capacidad-desc">Modelos complejos de procesos y simulación de escenarios que capturan la realidad operativa.</div>
+            </div>
+
+            <div class="capacidad-card">
+                <div class="capacidad-number">02</div>
+                <div class="capacidad-title">Resolución de problemas complejos</div>
+                <div class="capacidad-desc">Formulación matemática de desafíos reales de las operaciones y negocios con soluciones innovadoras.</div>
+            </div>
+
+            <div class="capacidad-card">
+                <div class="capacidad-number">03</div>
+                <div class="capacidad-title">Optimización e Investigación de Operaciones</div>
+                <div class="capacidad-desc">Cadena de valor, producción, inventarios, rutas logísticas — optimización integral.</div>
+            </div>
+
+            <div class="capacidad-card">
+                <div class="capacidad-number">04</div>
+                <div class="capacidad-title">Teoría de grafos</div>
+                <div class="capacidad-desc">Redes de transporte, flujos, cuellos de botella, suministro — análisis de conectividad.</div>
+            </div>
+
+            <div class="capacidad-card">
+                <div class="capacidad-number">05</div>
+                <div class="capacidad-title">Agentes autónomos de IA</div>
+                <div class="capacidad-desc">De la predicción a la ejecución automática. Sistemas que perciben, razonan y actúan.</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="servicios">
+        <h2 class="section-title">Nuestros Servicios</h2>
+        <p class="section-subtitle">Cada industria enfrenta desafíos únicos. Los resolvemos con inteligencia analítica diseñada, desarrollada e implementada para su realidad operativa.</p>
+
+        <div class="servicios-grid">
+            <div class="servicio-card">
+                <div class="servicio-badge">LOGÍSTICA</div>
+                <h3 class="servicio-title">Planificación de demanda y gestión de inventarios</h3>
+                <p class="servicio-desc">Predicción inteligente de demanda y optimización de inventarios para reducir costos y mejorar disponibilidad.</p>
+            </div>
+
+            <div class="servicio-card">
+                <div class="servicio-badge"> VIALIDAD / OPERACIONES</div>
+                <h3 class="servicio-title">Visión computacional para detección de eventos en carreteras urbanas y en operaciones</h3>
+                <p class="servicio-desc">Monitoreo inteligente de infraestructura vial y detección automática de incidentes en tiempo real.</p>
+            </div>
+
+            <div class="servicio-card">
+                <div class="servicio-badge">ENERGÍA</div>
+                <h3 class="servicio-title">Eficiencia energética y continuidad operacional</h3>
+                <p class="servicio-desc">Optimización del consumo energético y garantía de continuidad en operaciones críticas.</p>
+            </div>
+
+            <div class="servicio-card">
+                <div class="servicio-badge">TRANSFORMACIÓN</div>
+                <h3 class="servicio-title">Adopción de IA corporativa</h3>
+                <p class="servicio-desc">Estrategia, diseño e implementación de soluciones de IA alineadas con objetivos corporativos.</p>
+            </div>
+
+            <div class="servicio-card">
+                <div class="servicio-badge">MINERÍA</div>
+                <h3 class="servicio-title">Analítica modular para equipos de procesamiento de minerales</h3>
+                <p class="servicio-desc">Medición de performance y optimización de equipos en operaciones de procesamiento de minerales.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="metodologia">
+        <h2 class="section-title">Nuestro enfoque</h2>
+        <p class="section-subtitle">Escalamos con evidencia. Reducimos el riesgo y la incertidumbrede cada proyecto avanzando en fases, cada una con valor propio.</p>
+
+        <div class="capacidades-grid">
+            <div class="capacidad-card">
+                <div class="capacidad-number">01</div>
+                <div class="capacidad-title">Diagnóstico</div>
+                <div class="capacidad-desc">Evaluamos la factibilidad técnica y el impacto esperado antes de comprometer un desarrollo mayor. Alcance corto, resultados concretos.</div>
+            </div>
+
+            <div class="capacidad-card">
+                <div class="capacidad-number">02</div>
+                <div class="capacidad-title">Validación (PoC / MVP)</div>
+                <div class="capacidad-desc">Probamos la solución en un caso acotado — como prueba técnica (PoC) o en uso real con usuarios (MVP), según la madurez del proyecto.</div>
+            </div>
+
+            <div class="capacidad-card">
+                <div class="capacidad-number">03</div>
+                <div class="capacidad-title">Escalamiento Modular</div>
+                <div class="capacidad-desc">Con evidencia en mano, escalamos por fases con presupuestos claros y ajustados a cada etapa — sin comprometer todo el proyecto de una vez.</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="quienes-somos">
+        <h2 class="section-title">Quiénes Somos</h2>
+
+        <div class="team-grid">
+            <div class="team-member">
+                <img src="francisco.jpg" alt="Francisco Vásquez" class="member-avatar">
+                <h3 class="member-name">Francisco Vásquez Leiva</h3>
+                <p class="member-title">Co-Fundador</p>
+                <div class="linkedin-badge">
+                    <a href="https://www.linkedin.com/in/francisco-vasquez-leiva/" target="_blank">linkedin.com →</a>
+                </div>
+            </div>
+
+            <div class="team-member">
+                <img src="fernando.jpg" alt="Fernando Casado" class="member-avatar">
+                <h3 class="member-name">Fernando Casado Aller</h3>
+                <p class="member-title">Co-Fundador</p>
+                <div class="linkedin-badge">
+                    <a href="https://www.linkedin.com/in/fernando-casado-aller-43280364/" target="_blank">linkedin.com →</a>
+                </div>
+            </div>
+
+            <div class="team-member">
+                <img src="ricardo.jpg" alt="Ricardo Sepúlveda" class="member-avatar">
+                <h3 class="member-name">Ricardo Sepúlveda Morales</h3>
+                <p class="member-title">Co-Fundador</p>
+                <div class="linkedin-badge">
+                    <a href="https://www.linkedin.com/in/ricardosepulvedam/" target="_blank">linkedin.com →</a>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 12px; margin: 3rem 0; opacity: 0.5;">
+            <div style="flex: 1; height: 0.5px; background: rgba(0, 102, 204, 0.2);"></div>
+            <span style="font-size: 40px; font-weight: 500; color: #34495e; line-height: 1;">+</span>
+            <div style="flex: 1; height: 0.5px; background: rgba(0, 102, 204, 0.2);"></div>
+        </div>
+
+        <p class="quienes-somos-intro" style="text-align: center; margin-left: auto; margin-right: auto;"><strong>Academia  •  I+D  •  Tecnología de punta</strong></p>
+        <p class="quienes-somos-intro" style="text-align: center; margin-left: auto; margin-right: auto;">Estamos conectados con la academia y centros de modelamiento matemático para llevar innovación de frontera a soluciones operacionales.</p>
+    </section>
+
+    <section id="contacto">
+        <div class="contacto-content">
+            <h2 class="section-title">Conversemos</h2>
+            <p class="contacto-intro">¿Tienes un desafío que requiere análisis profundo y soluciones autónomas? Nos gustaría escucharte.</p>
+
+            <div class="contacto-info">
+                <div class="contact-item">
+                    <span class="contact-icon">✉️</span>
+                    <a href="mailto:juanricardo.sm@2fr.cl" class="contact-link">juanricardo.sm@2fr.cl</a>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📱</span>
+                    <a href="tel:+56993288481" class="contact-link">(+56) 9 9328 8481</a>
+                </div>
+            </div>
+
+            <a href="mailto:juanricardo.sm@2fr.cl" class="btn btn-primary">Enviar mensaje</a>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2024 2FR "Simplificando la complejidad"</p>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('meshCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        const particleCount = 50;
+        const connectionDistance = 150;
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.radius = Math.random() * 4 + 2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+                this.x = Math.max(0, Math.min(canvas.width, this.x));
+                this.y = Math.max(0, Math.min(canvas.height, this.y));
+            }
+
+            draw() {
+                const hue = (this.x / canvas.width * 360 + this.y / canvas.height * 360 + Date.now() * 0.1) % 360;
+                ctx.fillStyle = `hsl(${hue}, 100%, 55%)`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles.length = 0;
+            for (let i = 0; i < particleCount; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        function drawConnections() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < connectionDistance) {
+                        const hue = ((particles[i].x + particles[j].x) / 2 / canvas.width * 360 + (particles[i].y + particles[j].y) / 2 / canvas.height * 360 + Date.now() * 0.1) % 360;
+                        const opacity = (1 - distance / connectionDistance) * 0.25;
+                        ctx.strokeStyle = `hsla(${hue}, 100%, 55%, ${opacity})`;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(248, 250, 251, 0.25)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            drawConnections();
+            requestAnimationFrame(animate);
+        }
+
+        initParticles();
+        animate();
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        const heroContent = document.querySelector('.hero-content');
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            if (scrollY < window.innerHeight) {
+                heroContent.style.transform = `translateY(${scrollY * 0.5}px)`;
+                heroContent.style.opacity = 1 - (scrollY / window.innerHeight) * 0.3;
+            }
+        });
+    </script>
+</body>
+</html>
