@@ -134,62 +134,10 @@
             color: #ccc;
         }
 
-       .nav-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            gap: 5px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-            z-index: 1004;
-        }
-
-        .nav-toggle span {
-            display: block;
-            width: 24px;
-            height: 2px;
-            background: #0a1428;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .nav-toggle.open span:nth-child(1) {
-            transform: translateY(7px) rotate(45deg);
-        }
-
-        .nav-toggle.open span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .nav-toggle.open span:nth-child(3) {
-            transform: translateY(-7px) rotate(-45deg);
-        }
-
-        @media (max-width: 900px) {
-            .nav-toggle {
-                display: flex;
-            }
-
+        @media (max-width: 768px) {
             .nav-links {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 70%;
-                max-width: 320px;
-                height: 100vh;
-                background: #ffffff;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1.5rem;
-                padding: 6rem 2rem 2rem;
-                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
-                transition: right 0.3s ease;
-                font-size: 1rem;
-            }
-
-            .nav-links.open {
-                right: 0;
+                gap: 0.8rem;
+                font-size: 0.8rem;
             }
         }
 
@@ -597,12 +545,7 @@
                 <img src="logo.png" alt="2FR Logo" style="width: 50px; height: auto; margin-right: 12px; display: block;">
                 <span>2FR</span>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-            <ul class="nav-links" id="navLinks">
+            <ul class="nav-links">
                 <li><a href="#inicio">Inicio</a></li>
                 <li><a href="#motor">Motor Analítico</a></li>
                 <li><a href="#servicios">Servicios</a></li>
@@ -619,23 +562,6 @@
             </ul>
         </div>
     </nav>
-
-    <script>
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle.addEventListener('click', () => {
-            const isOpen = navLinks.classList.toggle('open');
-            navToggle.classList.toggle('open', isOpen);
-            navToggle.setAttribute('aria-expanded', isOpen);
-        });
-        navLinks.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('open');
-                navToggle.classList.remove('open');
-                navToggle.setAttribute('aria-expanded', false);
-            });
-        });
-    </script>
 
     <section class="hero" id="inicio">
         <canvas id="meshCanvas"></canvas>
